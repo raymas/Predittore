@@ -16,6 +16,12 @@ https:
 git clone --recursive https://github.com/raymas/EUvsCOVID.git
 ```
 
+Install the python submodules in requirements:
+
+```bash
+pip install -U -r requirements.txt
+```
+
 ## License
 
 
