@@ -1,0 +1,182 @@
+(function($){
+  $(function(){
+    $('.sidenav').sidenav();
+    $('select').formSelect();
+    $('.tabs').tabs();
+
+    $('#submit').on('click', () => {
+      var call = $('#formcountries').serialize()
+
+      $.ajax({
+        type: "POST",
+        url: '/data/compute/',
+        data: call,
+        success: (ret) => handleContents(ret),
+        dataType: 'text'
+      })
+
+    })
+  })
+  getCountryList()
+})(jQuery)
+
+
+function getCountryList() {
+  $.get("/data/fetch/countries", function( data ) {
+    data = JSON.parse(data)
+
+    console.log(data)
+    
+    var countriesdiv = document.getElementById('countries')
+    var html = ""
+    
+    Object.keys(data).forEach(function(key) {
+      html += `<div class="col s3"><label><input type="checkbox" id="${data[key]}" name="${data[key]}"/><span>${data[key]}</span></label></div>`
+    })
+    countriesdiv.innerHTML = html
+  })
+}
+
+
+function handleContents(ct) {
+
+  clearContents()
+
+  data = JSON.parse(ct)
+
+  console.log(data)
+
+  var mainContainer = document.getElementById('mainContent')
+
+  var collapsible = document.createElement('ul')
+  collapsible.className = 'collapsible'
+
+  mainContainer.appendChild(collapsible)
+
+  Object.keys(data).forEach((type) => {
+    var caseType = data[type]
+
+    var collapsibleLi = document.createElement('li')
+
+    collapsible.appendChild(collapsibleLi)
+
+    var collapsibleHeader = document.createElement('div')
+    collapsibleHeader.className = 'collapsible-header'
+    collapsibleHeader.innerHTML = `${capitalizeFirstLetter(type)}`
+
+    var collapsibleBody = document.createElement('div')
+    collapsibleBody.className = 'collapsible-body'
+
+    collapsibleLi.appendChild(collapsibleHeader)
+    collapsibleLi.appendChild(collapsibleBody)
+
+    Object.keys(caseType).forEach((measure) => {
+      var measureType = caseType[measure]
+
+      Object.keys(measureType).forEach((processed) => {
+        var processedType = measureType[processed]
+        var values = []        
+
+        Object.keys(processedType).forEach((country) => {
+          var countryType = processedType[country]
+          values.push({
+            x: Object.keys(countryType).map(cleanDate),
+            y: Object.values(countryType),
+            type: 'scatter',
+            name: country
+          })
+        })
+        createGraphLog(capitalizeFirstLetter(`${type} ${measure} ${processed}`), values, collapsibleBody)
+      })
+    })
+  })
+  var elems = document.querySelectorAll('.collapsible');
+  M.Collapsible.init(elems, {
+    onOpenEnd: triggerResize
+  })
+}
+
+function cleanDate(x) {
+  var d = new Date(x * 1000)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+function createGraphLog(name, data, parent) {
+  var layout = {
+    title: name,
+    xaxis: {
+      title: 'Date',
+      showgrid: true,
+      zeroline: true
+    },
+    yaxis: {
+      title: '',
+      showline: false
+    },
+  };
+
+  // Plott
+  var newplotdiv = document.createElement('div')
+  newplotdiv.id = name; 
+  newplotdiv.classList.add("control-panel")
+
+  // Summing all
+  parent.appendChild(newplotdiv);
+
+  Plotly.newPlot(name, data, layout, {responsive: true});
+}
+
+
+function updateGraphLog(name, values) {
+  Plotly.newPlot(name,
+    [{x: ALL_MESSAGES.Timestamp, 
+      y: values, 
+      type: 'scatter'}], 
+    layout = {
+    title: name,
+    xaxis: {
+      title: 'Time',
+      showgrid: true,
+      zeroline: true
+    },
+    yaxis: {
+      title: '',
+      showline: false
+    },
+  } , {responsive: true});
+}
+
+
+function updateValueWithFilter(name) {
+  if (ALL_MESSAGES[name].filter.active) {
+    ALL_MESSAGES[name].filter.values = filterData(ALL_MESSAGES[name].values, ALL_MESSAGES[name].filter.r, ALL_MESSAGES[name].filter.q)
+    updateGraphLog(name, ALL_MESSAGES[name].filter.values);
+  } else {
+    updateGraphLog(name, ALL_MESSAGES[name].values);
+  }
+}
+
+function filterData(data, R, Q) {
+  if (R == 0 && Q == 0) {
+    return data;
+  } 
+  var kalmanFilter = new KalmanFilter({R: R, Q: Q});
+  var dataConstantKalman = data.map(function(v) {
+    return kalmanFilter.filter(v);
+  });
+  return dataConstantKalman;
+}
+
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function clearContents() {
+  document.getElementById('mainContent').innerHTML = "";
+}
+
+function triggerResize () {
+  // workaround
+  window.dispatchEvent(new Event('resize'))
+}
