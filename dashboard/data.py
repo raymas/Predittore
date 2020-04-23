@@ -75,7 +75,7 @@ class COVID19:
             'confirmed': self.confirmed.get(),
             'deaths': self.deaths.get(),
             'recovered': self.recovered.get(),
-            'lockdown': self.predictEnd.to_dict()
+            'lockdown': self.predictEnd
         })
 
 def moving_average(df):
@@ -116,7 +116,7 @@ def makeComputations(countries):
 
 def predictEnd(selection):
     df_confirmed_cumu = selection['confirmed'].measurement.value
-    df_confirmed_diff = selection['confirmed'].measurement.value_ma
+    df_confirmed_diff = selection['confirmed'].measurement_diff.value_ma
 
     predictions = pd.DataFrame()
 
@@ -125,8 +125,9 @@ def predictEnd(selection):
         x, y = rangeSelect(x, y)
         # print(x, y)
 
-    for country in df_confirmed_cumu:
-        x, y = df_confirmed_diff[country].index.values, df_confirmed_diff[country].values
+    for country in df_confirmed_diff:
+        df = df_confirmed_diff[country].fillna(0)
+        x, y = df.index.values, df.values
         x, y = rangeSelect(x, y)
 
         # start gaussian at 0
@@ -134,15 +135,30 @@ def predictEnd(selection):
 
         gauss = gaussRegression(xdata, y)
 
-        # predictions[country] = gauss
-        # predictions.set_index(pd.index([]))
+        if df_confirmed_diff.shape[1] == 1:
+            df_gt = df[x]
+            predictions[country + " prediction"] = gauss
+            predictions = predictions.set_index(
+                pd.Index(
+                    np.concatenate((x, [x[len(x) - 1] + 84600 * i for i in range(gauss.shape[0] - x.shape[0])]), axis=None)
+                )
+            )
+            predictions[country + " ground Thruth"] = np.concatenate((df_gt.values, ['null' for _ in range(gauss.shape[0] - df_gt.values.shape[0])]), axis=None)
 
-    return pd.DataFrame()
+    print(predictions)
+
+    predictions_dict = {
+        'Gauss': {
+            'Derivate': predictions.to_dict()
+        }
+    }
+
+    return predictions_dict
 
 
 
 def rangeSelect(x, y, thresh=5):
-    start = np.where(y > 5)[0][0]
+    start = np.where(y > thresh)[0][0]
     x, y = x[start:], y[start:]
     return x, y
 

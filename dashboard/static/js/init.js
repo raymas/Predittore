@@ -31,7 +31,7 @@ function getCountryList() {
     var html = ""
     
     Object.keys(data).forEach(function(key) {
-      html += `<div class="col s3"><label><input type="checkbox" id="${data[key]}" name="${data[key]}"/><span>${data[key]}</span></label></div>`
+      html += `<div class="col s6 m3"><label><input type="checkbox" id="${data[key]}" name="${data[key]}"/><span>${data[key]}</span></label></div>`
     })
     countriesdiv.innerHTML = html
   })
