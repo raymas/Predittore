@@ -149,7 +149,7 @@ def predictEnd(selection):
 
     predictions_dict = {
         'Gauss': {
-            'Derivate': predictions.to_dict()
+            'Derivative': predictions.to_dict()
         }
     }
 
