@@ -1,4 +1,4 @@
-# EUvsCOVID
+# Predittore
 
 Pandemic prediction model from team Asvestis!
 
@@ -26,4 +26,4 @@ Connect to [localhost:5000](http://localhost:5000/)
 
 ## License
 
-Upcomming
+Under GNU GPL v3 [LICENSE](LICENSE.md)
