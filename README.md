@@ -1,3 +1,5 @@
+![dashboard](showdown/dashboard.jpg)
+
 # Predittore
 
 Pandemic prediction model from team Asvestis!
