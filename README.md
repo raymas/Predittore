@@ -19,7 +19,7 @@ pip install -U -r requirements.txt
 Start the webserver using:
 
 ```bash
-python dashboard/server.py
+python app.py
 ```
 
 Connect to [localhost:5000](http://localhost:5000/)
