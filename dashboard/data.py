@@ -21,7 +21,7 @@ import os
 import pandas as pd
 import datetime
 
-base_folder = os.path.join(os.path.dirname(__name__), '..', 'COVID-19', 'csse_covid_19_data', 'csse_covid_19_time_series')
+base_folder = os.path.join(os.path.dirname(__name__), 'COVID-19', 'csse_covid_19_data', 'csse_covid_19_time_series')
 
 def load(data):
     global base_folder
