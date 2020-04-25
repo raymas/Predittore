@@ -9,7 +9,7 @@
 
       $.ajax({
         type: "POST",
-        url: '/data/compute/',
+        url: '/data/compute/alldata/',
         data: call,
         success: (ret) => handleContents(ret),
         dataType: 'text'
@@ -200,7 +200,36 @@ function makeMap() {
     return response.json()
   }).then((countryBorders) => {
     console.log(countryBorders)
-    L.geoJSON(countryBorders).addTo(mainmap)
+    L.geoJSON(countryBorders, {
+      onEachFeature: onEachFeature
+    }).addTo(mainmap)
+  })
+}
+
+function onEachFeature(feature, layer) {
+  //bind click
+  layer.on({
+    click: (e) => {
+      let name = e.sourceTarget.feature.properties.ISO_A3 // ISO_A3
+      $.ajax({
+        type: "POST",
+        url: '/data/compute/lockdown/',
+        data: {
+          country: name
+        },
+        success: (ret) => console.log(ret),
+        dataType: 'text'
+      })
+    }
+  })
+
+  layer.on('mouseover', (e) => {
+    let name = e.sourceTarget.feature.properties.ISO_A3 // ISO_A3
+    layer.setStyle({color: '#ff0000'})
+  })
+
+  layer.on('mouseout', (e) => {
+    layer.setStyle({color: '#3388ff'})
   })
 
 }

@@ -8,9 +8,15 @@ import calendar
 
 data = Blueprint('data', __name__)
 
-@data.route('/compute/', methods=['GET', 'POST'])
+@data.route('/compute/alldata/', methods=['GET', 'POST'])
 def processData():
     return makeComputations(request.form)
+
+@data.route('/compute/lockdown/', methods=['POST'])
+def processHover():
+    res = [k for _, k in request.form.items()]
+    country = lookupCountry(res[0])
+    return rawDataToCOVID(country).to_json()
 
 @data.route('/fetch/<tt>')
 def getData(tt):
@@ -21,13 +27,37 @@ import os
 import pandas as pd
 import datetime
 
-base_folder = os.path.join(os.path.dirname(__name__), 'COVID-19', 'csse_covid_19_data', 'csse_covid_19_time_series')
+base_folder = os.path.join(os.path.dirname(__name__), 'COVID-19')
+
+timeseries_folder = os.path.join(base_folder, 'csse_covid_19_data', 'csse_covid_19_time_series')
+
+confirmed = pd.read_csv(os.path.join(timeseries_folder, 'time_series_covid19_confirmed_global.csv'), sep=',')
+deaths = pd.read_csv(os.path.join(timeseries_folder, 'time_series_covid19_deaths_global.csv'), sep=',')
+recovered = pd.read_csv(os.path.join(timeseries_folder, 'time_series_covid19_recovered_global.csv'), sep=',')
+
+def lookupCountry(iso3):
+    return countryLookupTable[iso3]
+
+
+def generateLookupTable():
+    global base_folder
+    data_folder = os.path.join(base_folder, 'csse_covid_19_data')
+
+    lookup = pd.read_csv(os.path.join(data_folder, 'UID_ISO_FIPS_LookUp_Table.csv'), sep=',')
+    lookup = lookup[['iso3', 'Country_Region']]
+    lookup.set_index('iso3', inplace=True)
+
+    return lookup.to_dict()['Country_Region']
+
+countryLookupTable = generateLookupTable()
 
 def load(data):
     global base_folder
 
+    timeseries_folder = os.path.join(base_folder, 'csse_covid_19_data', 'csse_covid_19_time_series')
+
     if data == 'countries':
-        recovered_data = pd.read_csv(os.path.join(base_folder, 'time_series_covid19_recovered_global.csv'), sep=',')
+        recovered_data = pd.read_csv(os.path.join(timeseries_folder, 'time_series_covid19_recovered_global.csv'), sep=',')
         countries = recovered_data['Country/Region'].drop_duplicates()
         return countries.to_json()
     else:
@@ -84,15 +114,18 @@ def moving_average(df):
 def makeComputations(countries):
     global base_folder
 
-    confirmed = pd.read_csv(os.path.join(base_folder, 'time_series_covid19_confirmed_global.csv'), sep=',')
-    deaths = pd.read_csv(os.path.join(base_folder, 'time_series_covid19_deaths_global.csv'), sep=',')
-    recovered = pd.read_csv(os.path.join(base_folder, 'time_series_covid19_recovered_global.csv'), sep=',')
+    countries = [k for k, _ in countries.items()]
+
+    selected = rawDataToCOVID(countries)
+
+    return selected.to_json()
+
+def rawDataToCOVID(countries):
+    global confirmed, deaths, recovered
 
     get_total_per_country = lambda df: df.sum(axis=0) if not df.isnull().values.any() else df[df.isna().any(axis=1)]
     # clean_date = lambda df: df.set_index(pd.Index([datetime.date(2000 + int(dd.split('/')[2]), int(dd.split('/')[0]), int(dd.split('/')[1])) for dd in list(df.index.values)]))
     clean_date = lambda df: df.set_index(pd.Index([calendar.timegm(datetime.date(2000 + int(dd.split('/')[2]), int(dd.split('/')[0]), int(dd.split('/')[1])).timetuple()) for dd in list(df.index.values)]))
-
-    countries = [k for k, _ in countries.items()]
 
     objs = []
     for obj in [confirmed, deaths, recovered]:
@@ -111,7 +144,7 @@ def makeComputations(countries):
 
     selected = COVID19(objs[0], objs[1], objs[2])
 
-    return selected.to_json()
+    return selected
 
 
 def predictEnd(selection):
