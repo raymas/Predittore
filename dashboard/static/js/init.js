@@ -17,7 +17,7 @@
 
     })
   })
-  getCountryList()
+  // getCountryList()
   makeMap()
 })(jQuery)
 
@@ -207,9 +207,14 @@ function makeMap() {
 }
 
 function onEachFeature(feature, layer) {
+
+  // add popup layer
+  layer.bindPopup('<p class="white-text">Loading...</p>');
+
   //bind click
   layer.on({
     click: (e) => {
+      var popup = e.target.getPopup()
       let name = e.sourceTarget.feature.properties.ISO_A3 // ISO_A3
       $.ajax({
         type: "POST",
@@ -217,7 +222,21 @@ function onEachFeature(feature, layer) {
         data: {
           country: name
         },
-        success: (ret) => console.log(ret),
+        success: (ret) => {
+          var result = JSON.parse(ret)
+          var valuesLength = Object.values(Object.values(result.confirmed.Cumulative.Raw)[0]).length
+          popup.setContent(`
+          <div class="center">
+          <h4 class="white-text">${e.sourceTarget.feature.properties.ADMIN}</h4>
+          <p class="blue-text">Confirmed</p>
+          <h5 class="white-text">${Object.values(Object.values(result.confirmed.Cumulative.Raw)[0])[valuesLength - 1]}</h5>
+          <p class="red-text">Deaths</p>
+          <h5 class="white-text">${Object.values(Object.values(result.deaths.Cumulative.Raw)[0])[valuesLength - 1]}</h5>
+          <p class="green-text">Recovered</p>
+          <h5 class="white-text">${Object.values(Object.values(result.recovered.Cumulative.Raw)[0])[valuesLength - 1]}</h5>
+          </div>`)
+          popup.update()
+        },
         dataType: 'text'
       })
     }

@@ -16,7 +16,7 @@ def processData():
 def processHover():
     res = [k for _, k in request.form.items()]
     country = lookupCountry(res[0])
-    return rawDataToCOVID(country).to_json()
+    return rawDataToCOVID([country]).to_json()
 
 @data.route('/fetch/<tt>')
 def getData(tt):
@@ -94,18 +94,18 @@ class COVID19:
         self.confirmed = Measurement(confirmed)
         self.deaths = Measurement(deaths)
         self.recovered = Measurement(recovered)
-        self.predictEnd = predictEnd({
-            'confirmed': self.confirmed,
-            'deaths': self.deaths,
-            'recovered': self.recovered
-        })
+        # self.predictEnd = predictEnd({
+        #     'confirmed': self.confirmed,
+        #     'deaths': self.deaths,
+        #     'recovered': self.recovered
+        # })
 
     def to_json(self):
         return json.dumps({
             'confirmed': self.confirmed.get(),
             'deaths': self.deaths.get(),
             'recovered': self.recovered.get(),
-            'lockdown': self.predictEnd
+            # 'lockdown': self.predictEnd
         })
 
 def moving_average(df):

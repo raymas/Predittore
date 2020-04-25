@@ -13,3 +13,8 @@
   margin: 0 auto;
   display: block;
 }
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background-color: #212121;
+}
