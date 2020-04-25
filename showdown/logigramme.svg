@@ -45,9 +45,9 @@
      inkscape:window-height="1024"
      id="namedview136"
      showgrid="false"
-     inkscape:zoom="0.75524475"
-     inkscape:cx="457.19193"
-     inkscape:cy="166.00063"
+     inkscape:zoom="1.0680774"
+     inkscape:cx="330.43824"
+     inkscape:cy="191.07511"
      inkscape:window-x="0"
      inkscape:window-y="28"
      inkscape:window-maximized="0"
@@ -268,34 +268,6 @@
        pointer-events="all"
        id="rect62"
        style="fill:#ffffff;stroke:#000000" />
-    <g
-       transform="translate(-0.5,-0.5)"
-       id="g68">
-      <switch
-         id="switch66">
-        <foreignObject
-           style="overflow: visible; text-align: left;"
-           pointer-events="none"
-           width="100%"
-           height="100%"
-           requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
-          <xhtml:div
-             style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 330px; margin-left: 245px;">
-            <xhtml:div
-               style="box-sizing: border-box; font-size: 0; text-align: center; ">
-              <xhtml:div
-                 style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">Gaussian curve fitting</xhtml:div>
-            </xhtml:div>
-          </xhtml:div>
-        </foreignObject>
-        <text
-           x="304"
-           y="334"
-           font-size="12px"
-           id="text64"
-           style="font-size:12px;font-family:Helvetica;text-anchor:middle;fill:#000000">Gaussian curve fitti...</text>
-      </switch>
-    </g>
     <path
        d="M 20,16 C 20,-5.33 80,-5.33 80,16 V 64 C 80,85.33 20,85.33 20,64 Z"
        stroke-miterlimit="10"
@@ -549,5 +521,16 @@
          id="tspan961"
          x="17.591797"
          y="332.20703">Daily new cases</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:8px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       x="249.24414"
+       y="332.75879"
+       id="text969"><tspan
+         sodipodi:role="line"
+         id="tspan967"
+         x="249.24414"
+         y="332.75879"
+         style="font-size:10px">Gaussian curve fitting</tspan></text>
   </g>
 </svg>
