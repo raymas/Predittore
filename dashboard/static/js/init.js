@@ -235,7 +235,7 @@ function onEachFeature(feature, layer) {
           popup.setContent(`
           <div class="center">
           <h5 class="white-text">${e.sourceTarget.feature.properties.ADMIN}</h5>
-          <div style="border: solid orange;">
+          <div style="border: solid orange; margin: 2px;">
             <h6 class="orange-text">Expected end of lockdown</h6>
             <h4 class="orange-text">${new Date(endDate * 1000).toDateString()}</h4>
           </div>
