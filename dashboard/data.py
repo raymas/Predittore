@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request
 from dataclasses import dataclass
 from scipy.optimize import curve_fit
-from datetime import datetime
+from datetime import datetime, timedelta, date
 import numpy as np
 import json
 import calendar
@@ -25,7 +25,6 @@ def getData(tt):
 
 import os
 import pandas as pd
-import datetime
 
 base_folder = os.path.join(os.path.dirname(__name__), 'COVID-19')
 
@@ -125,7 +124,7 @@ def rawDataToCOVID(countries):
 
     get_total_per_country = lambda df: df.sum(axis=0) if not df.isnull().values.any() else df[df.isna().any(axis=1)]
     # clean_date = lambda df: df.set_index(pd.Index([datetime.date(2000 + int(dd.split('/')[2]), int(dd.split('/')[0]), int(dd.split('/')[1])) for dd in list(df.index.values)]))
-    clean_date = lambda df: df.set_index(pd.Index([calendar.timegm(datetime.date(2000 + int(dd.split('/')[2]), int(dd.split('/')[0]), int(dd.split('/')[1])).timetuple()) for dd in list(df.index.values)]))
+    clean_date = lambda df: df.set_index(pd.Index([calendar.timegm(date(2000 + int(dd.split('/')[2]), int(dd.split('/')[0]), int(dd.split('/')[1])).timetuple()) for dd in list(df.index.values)]))
 
     objs = []
     for obj in [confirmed, deaths, recovered]:
@@ -156,13 +155,13 @@ def predictEnd(selection):
 
     for country in df_confirmed_cumu:
         x, y = df_confirmed_cumu[country].index.values, df_confirmed_cumu[country].values
-        x, y = rangeSelect(x, y)
+        x, y, xs = rangeSelect(x, y)
         # print(x, y)
 
     for country in df_confirmed_diff:
         df = df_confirmed_diff[country].fillna(0)
         x, y = df.index.values, df.values
-        x, y = rangeSelect(x, y)
+        x, y, xs = rangeSelect(x, y)
 
         # start gaussian at 0
         xdata = range(len(x))
@@ -171,7 +170,9 @@ def predictEnd(selection):
 
         if df_confirmed_diff.shape[1] == 1:
             df_gt = df[x]
+            # forward_date = [datetime.fromtimestamp(x[xs]) + timedelta(days=i) for i in range(gauss.shape[0] - x.shape[0])]
             forward_date = [x[len(x) - 1] + 84600 * i for i in range(gauss.shape[0] - x.shape[0])]
+            # print(forward_date)
             predictions["prediction"] = gauss
             predictions = predictions.set_index(
                 pd.Index(
@@ -180,15 +181,15 @@ def predictEnd(selection):
             )
             predictions["ground thruth"] = np.concatenate((df_gt.values, ['null' for _ in range(gauss.shape[0] - df_gt.values.shape[0])]), axis=None)
 
-        zero_new_case = np.where(gauss < 1)[0][0]
-        lockdown_end = forward_date[zero_new_case]
-        print(lockdown_end)
+        # zero_new_case = np.where(gauss < 1)[0][0]
+        # lockdown_end = calendar.timegm(forward_date[zero_new_case].timetuple())
+        # print(lockdown_end)
 
     predictions_dict = {
         'Gauss': {
             'Derivative': predictions.to_dict()
         },
-        'End': int(lockdown_end)
+        # 'End': int(lockdown_end)
     }
 
     return predictions_dict
@@ -198,7 +199,7 @@ def predictEnd(selection):
 def rangeSelect(x, y, thresh=5):
     start = np.where(y > thresh)[0][0]
     x, y = x[start:], y[start:]
-    return x, y
+    return x, y, start
 
 
 def gaussRegression(x ,y, forward=7 * 48):

@@ -225,10 +225,17 @@ function onEachFeature(feature, layer) {
         success: (ret) => {
           var result = JSON.parse(ret)
           var valuesLength = Object.values(Object.values(result.confirmed.Cumulative.Raw)[0]).length
+          var endIndex = Object.values(result.lockdown.Gauss.Derivative.prediction).findIndex(x => x < 1)
+          if (endIndex >= 0) {
+            var endDate = Object.keys(result.lockdown.Gauss.Derivative.prediction)[endIndex]
+          } else {
+            var endDate = 'No data'
+          }
+
           popup.setContent(`
           <div class="center">
-          <h4 class="white-text">${e.sourceTarget.feature.properties.ADMIN}</h4>
-          <h6 class="white-text">${new Date(result.lockdown.End * 1000).toDateString()}</h6>
+          <h5 class="white-text">${e.sourceTarget.feature.properties.ADMIN}</h5>
+          <h4 class="orange-text">${new Date(endDate * 1000).toDateString()}</h4>
           <table class="centered">
           <thead>
             <tr>
