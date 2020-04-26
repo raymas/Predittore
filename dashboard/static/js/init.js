@@ -228,6 +228,7 @@ function onEachFeature(feature, layer) {
           popup.setContent(`
           <div class="center">
           <h4 class="white-text">${e.sourceTarget.feature.properties.ADMIN}</h4>
+          <h6 class="white-text">${new Date(result.lockdown.End * 1000).toDateString()}</h6>
           <table class="centered">
           <thead>
             <tr>
@@ -246,6 +247,23 @@ function onEachFeature(feature, layer) {
           </table>
           </div>`)
           popup.update()
+
+          console.log(result.lockdown.Gauss.Derivative)
+
+          var values = []
+          Object.entries(result.lockdown.Gauss.Derivative).forEach(([key, value]) => {
+            var country = value
+            values.push({
+              x: Object.keys(country).map(cleanDate),
+              y: Object.values(country),
+              type: 'scatter',
+              name: name
+            })
+          })
+          console.log(values)
+
+          var collapsibleBody = document.getElementById('countries')
+          createGraphLog(capitalizeFirstLetter('Expected curve'), values, collapsibleBody)
         },
         dataType: 'text'
       })

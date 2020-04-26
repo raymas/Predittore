@@ -105,7 +105,7 @@ class COVID19:
             'confirmed': self.confirmed.get(),
             'deaths': self.deaths.get(),
             'recovered': self.recovered.get(),
-            # 'lockdown': self.predictEnd
+            'lockdown': self.lockdown
         })
 
 def moving_average(df):
@@ -143,13 +143,14 @@ def rawDataToCOVID(countries):
         objs.append(pd.concat(dfs, axis=1, sort=False))
 
     selected = COVID19(objs[0], objs[1], objs[2])
+    selected.lockdown = predictEnd(selected)
 
     return selected
 
 
 def predictEnd(selection):
-    df_confirmed_cumu = selection['confirmed'].measurement.value
-    df_confirmed_diff = selection['confirmed'].measurement_diff.value_ma
+    df_confirmed_cumu = selection.confirmed.measurement.value
+    df_confirmed_diff = selection.confirmed.measurement_diff.value_ma
 
     predictions = pd.DataFrame()
 
@@ -170,20 +171,24 @@ def predictEnd(selection):
 
         if df_confirmed_diff.shape[1] == 1:
             df_gt = df[x]
-            predictions[country + " prediction"] = gauss
+            forward_date = [x[len(x) - 1] + 84600 * i for i in range(gauss.shape[0] - x.shape[0])]
+            predictions["prediction"] = gauss
             predictions = predictions.set_index(
                 pd.Index(
-                    np.concatenate((x, [x[len(x) - 1] + 84600 * i for i in range(gauss.shape[0] - x.shape[0])]), axis=None)
+                    np.concatenate((x, forward_date), axis=None)
                 )
             )
-            predictions[country + " ground Thruth"] = np.concatenate((df_gt.values, ['null' for _ in range(gauss.shape[0] - df_gt.values.shape[0])]), axis=None)
+            predictions["ground thruth"] = np.concatenate((df_gt.values, ['null' for _ in range(gauss.shape[0] - df_gt.values.shape[0])]), axis=None)
 
-    print(predictions)
+        zero_new_case = np.where(gauss < 1)[0][0]
+        lockdown_end = forward_date[zero_new_case]
+        print(lockdown_end)
 
     predictions_dict = {
         'Gauss': {
             'Derivative': predictions.to_dict()
-        }
+        },
+        'End': int(lockdown_end)
     }
 
     return predictions_dict
