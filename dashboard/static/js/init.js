@@ -228,12 +228,22 @@ function onEachFeature(feature, layer) {
           popup.setContent(`
           <div class="center">
           <h4 class="white-text">${e.sourceTarget.feature.properties.ADMIN}</h4>
-          <p class="blue-text">Confirmed</p>
-          <h5 class="white-text">${Object.values(Object.values(result.confirmed.Cumulative.Raw)[0])[valuesLength - 1]}</h5>
-          <p class="red-text">Deaths</p>
-          <h5 class="white-text">${Object.values(Object.values(result.deaths.Cumulative.Raw)[0])[valuesLength - 1]}</h5>
-          <p class="green-text">Recovered</p>
-          <h5 class="white-text">${Object.values(Object.values(result.recovered.Cumulative.Raw)[0])[valuesLength - 1]}</h5>
+          <table class="centered">
+          <thead>
+            <tr>
+              <th class="blue-text">Confirmed</th>
+              <th class="red-text">Deaths</th>
+              <th class="green-text">Recovered</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><h5 class="white-text">${Object.values(Object.values(result.confirmed.Cumulative.Raw)[0])[valuesLength - 1]}</h5></td>
+              <td><h5 class="white-text">${Object.values(Object.values(result.deaths.Cumulative.Raw)[0])[valuesLength - 1]}</h5></td>
+              <td><h5 class="white-text">${Object.values(Object.values(result.recovered.Cumulative.Raw)[0])[valuesLength - 1]}</h5></td>
+            </tr>
+          </tbody>
+          </table>
           </div>`)
           popup.update()
         },
